@@ -1,0 +1,24 @@
+{
+	"name": "embed-d3",
+	"version": "1.0.0",
+	"description": "embedding d3 docs",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "Abhimanyu08",
+	"license": "ISC",
+	"dependencies": {
+		"jsdom": "^22.1.0",
+		"mdast-util-from-markdown": "^2.0.0",
+		"mdast-util-to-markdown": "^2.1.0",
+		"puppeteer": "^21.3.8",
+		"turndown": "^7.1.2"
+	},
+	"devDependencies": {
+		"@types/jsdom": "^21.1.3",
+		"@types/turndown": "^5.0.2",
+		"supabase": "^1.100.1"
+	}
+}
