@@ -3,7 +3,7 @@ import fs from "fs";
 import TurndownService from "turndown";
 import { JSDOM } from "jsdom";
 
-async function getAlld3Links() {
+async function getAllLinks(landingLink: string) {
 	// Launch a headless browser
 	const browser = await puppeteer.launch({ headless: "new" });
 
@@ -11,7 +11,7 @@ async function getAlld3Links() {
 	const page = await browser.newPage();
 
 	// Navigate to the D3.js documentation website
-	await page.goto("https://d3js.org/what-is-d3");
+	await page.goto(landingLink);
 
 	// You would need to interact with the website to access specific documentation pages
 	// and scrape their content. This might involve clicking links, following navigation, etc.
@@ -32,7 +32,8 @@ async function getAlld3Links() {
 	return allD3Links;
 }
 
-async function d3LinkToMarkdown(
+async function linkToMarkdown(
+	origin: string,
 	link: string,
 	browser: Browser,
 	turndown: TurndownService
@@ -41,7 +42,7 @@ async function d3LinkToMarkdown(
 	const page = await browser.newPage();
 
 	// Navigate to the D3.js documentation website
-	await page.goto("https://d3js.org" + link);
+	await page.goto(origin + link);
 
 	// You would need to interact with the website to access specific documentation pages
 	// and scrape their content. This might involve clicking links, following navigation, etc.
@@ -67,20 +68,38 @@ async function d3LinkToMarkdown(
 	const modifiedHtml = dom.serialize();
 
 	const markdown = turndown.turndown(modifiedHtml);
+	if (!fs.existsSync("markdown")) {
+		fs.mkdirSync("markdown")
+	}
 	fs.writeFileSync(`markdown${link}.md`, markdown);
 }
 
-async function convertAllD3pagesToMarkdown() {
+const getAlld3Links = () => getAllLinks("https://d3js.org/what-is-d3")
+const getAllPlotLinks = () => getAllLinks("https://observablehq.com/plot/what-is-plot")
+
+
+export async function convertAllD3pagesToMarkdown() {
 	const allPageLinks = await getAlld3Links();
 
 	const browser = await puppeteer.launch({ headless: "new" });
 
 	const turndown = new TurndownService();
-	for (let link of allPageLinks.slice(0, 3)) {
-		await d3LinkToMarkdown(link, browser, turndown);
+	for (let link of allPageLinks) {
+		await linkToMarkdown("https://d3js.org", link, browser, turndown);
 	}
 
 	browser.close();
 }
+export async function convertAllPlotpagesToMarkdown() {
+	const allPageLinks = await getAllPlotLinks();
 
-export default convertAllD3pagesToMarkdown()
+	const browser = await puppeteer.launch({ headless: "new" });
+
+	const turndown = new TurndownService();
+	for (let link of allPageLinks) {
+		await linkToMarkdown("https://observablehq.com/plot/", link, browser, turndown);
+
+	}
+
+	browser.close();
+}

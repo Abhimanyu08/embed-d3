@@ -11,16 +11,19 @@ export interface Database {
     Tables: {
       documents: {
         Row: {
+          checksum: string | null
           content: string | null
           embedding: number[] | null
           id: number
         }
         Insert: {
+          checksum?: string | null
           content?: string | null
           embedding: number[] | null
           id?: never
         }
         Update: {
+          checksum?: string | null
           content?: string | null
           embedding: number[] | null
           id?: never

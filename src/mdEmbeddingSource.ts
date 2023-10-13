@@ -1,60 +1,71 @@
-import fs from 'node:fs/promises'
-import { fromMarkdown } from 'mdast-util-from-markdown'
-import { toMarkdown } from 'mdast-util-to-markdown'
+import fs from "node:fs/promises";
+import { fromMarkdown } from "mdast-util-from-markdown";
+import { toMarkdown } from "mdast-util-to-markdown";
+import { createHash } from "crypto";
 
-function extractTextFromHeadingChildren(children: ReturnType<typeof fromMarkdown>["children"]) {
-    let text = ""
-    for (let child of children) {
-        if (child.type === "text") {
-            text += child.value
-            continue
-        }
-        text += extractTextFromHeadingChildren((child as any).children)
-    }
+function extractTextFromHeadingChildren(
+	children: ReturnType<typeof fromMarkdown>["children"]
+) {
+	let text = "";
+	for (let child of children) {
+		if (child.type === "text") {
+			text += child.value;
+			continue;
+		}
+		text += extractTextFromHeadingChildren((child as any).children);
+	}
 
-    return text
+	return text;
 }
 
-type Section = { title: string, content: string }
+type Section = { title: string; content: string; checksum: string };
 class MarkdownEmbeddingSouce {
-    fileName: string
-    sections: Section[]
+	fileName: string;
 
-    constructor(fileName = "/") {
-        this.fileName = fileName
-        this.sections = []
-    }
+	constructor(fileName = "/") {
+		this.fileName = fileName;
+	}
 
-    async load() {
-        const doc = (await fs.readFile(`markdown/${this.fileName}`))
-        const tree = fromMarkdown(doc)
+	async *divideIntoSections() {
+		const doc = await fs.readFile(`markdown/${this.fileName}`);
+		const tree = fromMarkdown(doc);
 
-        const sections: Section[] = []
+		const currentSection: Section = {
+			title: "",
+			content: "",
+			checksum: "",
+		};
+		for (let child of tree.children) {
+			if (child.type === "heading") {
+				if (currentSection.title && currentSection.content) {
+					const checksum = createHash("sha256")
+						.update(currentSection.content)
+						.digest("base64");
+					yield { ...currentSection, checksum };
+					currentSection.title = "";
+					currentSection.content = "";
+					currentSection.checksum = "";
+				}
+				currentSection.title = extractTextFromHeadingChildren(
+					child.children
+				);
+				currentSection.content += toMarkdown(child);
+				continue;
+			}
 
-        const currentSection: Section = { title: "", content: "" }
-        for (let child of tree.children) {
-            if (child.type === "heading") {
-                if (currentSection.title && currentSection.content) {
-                    sections.push({ ...currentSection })
-                    currentSection.title = ""
-                    currentSection.content = ""
-                }
-                currentSection.title = extractTextFromHeadingChildren(child.children)
-                currentSection.content += toMarkdown(child)
-                continue
-            }
+			currentSection.content += toMarkdown(child);
+		}
+		if (currentSection.title && currentSection.content) {
+			const checksum = createHash("sha256")
+				.update(currentSection.content)
+				.digest("base64");
+			yield { ...currentSection, checksum };
+		}
+	}
 
-            currentSection.content += toMarkdown(child)
-        }
-        if (currentSection.title && currentSection.content) {
-            sections.push({ ...currentSection })
-        }
-        this.sections = sections
-    }
-
-    *[Symbol.iterator]() {
-        yield* this.sections
-    }
+	async *[Symbol.asyncIterator]() {
+		yield* this.divideIntoSections();
+	}
 }
 
-export default MarkdownEmbeddingSouce
+export default MarkdownEmbeddingSouce;
