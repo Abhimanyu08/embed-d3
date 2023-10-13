@@ -83,4 +83,4 @@ async function convertAllD3pagesToMarkdown() {
 	browser.close();
 }
 
-convertAllD3pagesToMarkdown();
+export default convertAllD3pagesToMarkdown()

@@ -51,6 +51,10 @@ class MarkdownEmbeddingSouce {
         }
         this.sections = sections
     }
+
+    *[Symbol.iterator]() {
+        yield* this.sections
+    }
 }
 
 export default MarkdownEmbeddingSouce
