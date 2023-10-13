@@ -10,9 +10,11 @@
 	"author": "Abhimanyu08",
 	"license": "ISC",
 	"dependencies": {
+		"@supabase/supabase-js": "^2.38.1",
 		"jsdom": "^22.1.0",
 		"mdast-util-from-markdown": "^2.0.0",
 		"mdast-util-to-markdown": "^2.1.0",
+		"openai": "^4.12.1",
 		"puppeteer": "^21.3.8",
 		"turndown": "^7.1.2"
 	},
