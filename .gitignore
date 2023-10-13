@@ -2,4 +2,4 @@
 /markdown
 /supabase
 /dist
-.env
+/.env
