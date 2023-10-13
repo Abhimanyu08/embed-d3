@@ -5,15 +5,12 @@ import { createClient } from '@supabase/supabase-js'
 import { Database } from './database.types.js';
 
 // Define the folder name you want to check
-const OPENAI_API_KEY = "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"
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhueXJtanJrdWt6bmdwbGVqYmN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTcxMTQyMjUsImV4cCI6MjAxMjY5MDIyNX0.YzfX52kBbahDY1uW1Pvh75g3xWJ2PVn0Q-8172_8pvo"
-const SUPABASE_URL = "https://xnyrmjrkukzngplejbcx.supabase.co"
 const folderName = 'markdown';
 const openai = new OpenAI({
-    apiKey: OPENAI_API_KEY
+    apiKey: process.env.OPENAI_API_KEY
 })
 
-const supabase = createClient<Database>(SUPABASE_URL!, SUPABASE_KEY!)
+const supabase = createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_KEY!)
 
 // Check if the folder exists in the current working directory
 
