@@ -24,6 +24,7 @@ function* markdownFilesToSource() {
 
 		if (fileNames.length > 0) {
 			for (let filename of fileNames) {
+				console.log("Embedding", filename)
 				yield new MarkdownEmbeddingSouce(filename);
 			}
 		} else {

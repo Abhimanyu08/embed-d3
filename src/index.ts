@@ -6,6 +6,4 @@ async function main() {
     await generateEmbeddings()
 
 }
-
-
 main()

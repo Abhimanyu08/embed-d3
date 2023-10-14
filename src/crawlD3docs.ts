@@ -71,7 +71,7 @@ async function linkToMarkdown(
 	if (!fs.existsSync("markdown")) {
 		fs.mkdirSync("markdown")
 	}
-	fs.writeFileSync(`markdown${link}.md`, markdown);
+	fs.writeFileSync(`markdown/${link.replace(/\//g, "_").slice(1)}.md`, markdown);
 }
 
 const getAlld3Links = () => getAllLinks("https://d3js.org/what-is-d3")
@@ -85,6 +85,7 @@ export async function convertAllD3pagesToMarkdown() {
 
 	const turndown = new TurndownService();
 	for (let link of allPageLinks) {
+		console.log("crawling", link)
 		await linkToMarkdown("https://d3js.org", link, browser, turndown);
 	}
 

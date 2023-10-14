@@ -14,7 +14,6 @@ function extractTextFromHeadingChildren(
 		}
 		text += extractTextFromHeadingChildren((child as any).children);
 	}
-
 	return text;
 }
 
