@@ -16,6 +16,7 @@ const openai = new OpenAI({
 const supabase = createClient<Database>(keys!.SUPABASE_URL, keys!.SUPABASE_KEY);
 
 // Check if the folder exists in the current working directory
+const fileNameToIgnore = ["api.md", "getting-started.md", "what-is-d3.md"]
 
 function* markdownFilesToSource() {
 	if (fs.existsSync(folderName) && fs.statSync(folderName).isDirectory()) {
@@ -24,7 +25,7 @@ function* markdownFilesToSource() {
 
 		if (fileNames.length > 0) {
 			for (let filename of fileNames) {
-				console.log("Embedding", filename)
+				if (fileNameToIgnore.includes(filename)) continue
 				yield new MarkdownEmbeddingSouce(filename);
 			}
 		} else {

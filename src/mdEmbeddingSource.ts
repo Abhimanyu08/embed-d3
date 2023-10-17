@@ -17,7 +17,7 @@ function extractTextFromHeadingChildren(
 	return text;
 }
 
-type Section = { title: string; content: string; checksum: string };
+type Section = { content: string; checksum: string };
 class MarkdownEmbeddingSouce {
 	fileName: string;
 
@@ -25,46 +25,44 @@ class MarkdownEmbeddingSouce {
 		this.fileName = fileName;
 	}
 
-	async *divideIntoSections() {
-		const doc = await fs.readFile(`markdown/${this.fileName}`);
-		const tree = fromMarkdown(doc);
 
-		const currentSection: Section = {
-			title: "",
-			content: "",
-			checksum: "",
-		};
-		for (let child of tree.children) {
-			if (child.type === "heading") {
-				if (currentSection.title && currentSection.content) {
-					const checksum = createHash("sha256")
-						.update(currentSection.content)
-						.digest("base64");
-					yield { ...currentSection, checksum };
-					currentSection.title = "";
-					currentSection.content = "";
-					currentSection.checksum = "";
-				}
-				currentSection.title = extractTextFromHeadingChildren(
-					child.children
-				);
-				currentSection.content += toMarkdown(child);
-				continue;
+
+	async *[Symbol.asyncIterator]() {
+		yield* divideIntoSections(this.fileName);
+	}
+}
+async function* divideIntoSections(fileName: string) {
+	const doc = await fs.readFile(`markdown/${fileName}`);
+	const tree = fromMarkdown(doc);
+
+	const currentSection: Section = {
+		content: "",
+		checksum: "",
+	};
+	for (let child of tree.children) {
+		if (child.type === "heading" && child.depth === 1) {
+			if (currentSection.content) {
+				const checksum = createHash("sha256")
+					.update(currentSection.content)
+					.digest("base64");
+				yield { ...currentSection, checksum };
+				currentSection.content = "";
+				currentSection.checksum = "";
 			}
 
 			currentSection.content += toMarkdown(child);
+			continue;
 		}
-		if (currentSection.title && currentSection.content) {
-			const checksum = createHash("sha256")
-				.update(currentSection.content)
-				.digest("base64");
-			yield { ...currentSection, checksum };
-		}
-	}
 
-	async *[Symbol.asyncIterator]() {
-		yield* this.divideIntoSections();
+		currentSection.content += toMarkdown(child);
+	}
+	if (currentSection.content) {
+		const checksum = createHash("sha256")
+			.update(currentSection.content)
+			.digest("base64");
+		yield { ...currentSection, checksum };
 	}
 }
+
 
 export default MarkdownEmbeddingSouce;
